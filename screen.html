@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>年会节目实时投票</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<style>
+body { margin:0; font-family:"Microsoft YaHei", Arial; background:linear-gradient(135deg,#0f2027,#203a43,#2c5364); color:#fff; }
+h1 { text-align:center; padding:30px 0; font-size:48px; }
+#container { width:80%; margin:auto; }
+.item { margin:20px 0; }
+.title { display:flex; justify-content:space-between; font-size:28px; }
+.bar-bg { width:100%; height:30px; background:rgba(255,255,255,0.2); border-radius:15px; overflow:hidden; margin-top:10px; }
+.bar { height:100%; width:0%; background:linear-gradient(90deg,#f7971e,#ffd200); transition:width 0.6s ease; }
+.rank-1 .bar { background:linear-gradient(90deg,gold,orange); }
+.rank-2 .bar { background:linear-gradient(90deg,silver,#aaa); }
+.rank-3 .bar { background:linear-gradient(90deg,#cd7f32,#b87333); }
+</style>
+</head>
+<body>
+
+<h1>🎉 年会节目实时投票 🎉</h1>
+<div id="container"></div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyA4LcWqtAhVbq0KDEmm2Hk0l-_me-dn-aY",
+  authDomain: "vote-25c12.firebaseapp.com",
+  databaseURL: "https://vote-25c12-default-rtdb.firebaseio.com",
+  projectId: "vote-25c12",
+  storageBucket: "vote-25c12.appspot.com",
+  messagingSenderId: "344176299020",
+  appId: "1:344176299020:web:3c68a76bf1df256978f229",
+  measurementId: "G-JXQGZLRKVK"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+db.ref("votes").on("value", snapshot => {
+  const data = snapshot.val() || {};
+  const list = Object.entries(data).map(([k,v]) => [k, Number(v)])
+                     .sort((a,b) => b[1] - a[1]);
+  const max = list.length ? list[0][1] : 1;
+  let html = "";
+  list.forEach((item,index)=>{
+    const percent = Math.round(item[1]/max*100);
+    html += `<div class="item rank-${index+1}">
+      <div class="title"><span>🏆 ${index+1}. ${item[0]}</span><span>${item[1]} 票</span></div>
+      <div class="bar-bg"><div class="bar" style="width:${percent}%"></div></div>
+    </div>`;
+  });
+  document.getElementById("container").innerHTML = html;
+});
+</script>
+
+</body>
+</html>

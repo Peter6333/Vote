@@ -3,25 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <title>年会节目投票</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <style>
-body { font-family:"Microsoft YaHei", Arial; background:#f7f7f7; padding:20px; }
-h2 { text-align:center; }
-.box { background:#fff; padding:15px; border-radius:10px; margin-bottom:15px; }
-button { width:100%; padding:12px; font-size:18px; background:#ff9800; color:#fff; border:none; border-radius:8px; }
+body { font-family:"Microsoft YaHei", Arial; background:#0f2027; color:#fff; text-align:center; padding:50px; }
+h1 { font-size:36px; margin-bottom:40px; }
+button { font-size:24px; padding:20px 40px; margin:20px; border:none; border-radius:10px; cursor:pointer; background:orange; color:#fff; transition:0.3s; }
+button:hover { background:gold; color:#000; }
 </style>
+</head>
+<body>
+
+<h1>🎉 年会节目投票 🎉</h1>
+
+<div>
+  <button onclick="vote('节目A')">节目A</button>
+  <button onclick="vote('节目B')">节目B</button>
+  <button onclick="vote('节目C')">节目C</button>
+</div>
 
 <script>
-/* 🔥 替换成你自己的 Firebase 配置 */
 const firebaseConfig = {
   apiKey: "AIzaSyA4LcWqtAhVbq0KDEmm2Hk0l-_me-dn-aY",
   authDomain: "vote-25c12.firebaseapp.com",
+  databaseURL: "https://vote-25c12-default-rtdb.firebaseio.com", // ✅ Realtime Database URL
   projectId: "vote-25c12",
-  storageBucket: "vote-25c12.firebasestorage.app",
+  storageBucket: "vote-25c12.appspot.com",
   messagingSenderId: "344176299020",
   appId: "1:344176299020:web:3c68a76bf1df256978f229",
   measurementId: "G-JXQGZLRKVK"
@@ -30,51 +39,17 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const programs = ["舞蹈", "合唱", "相声", "小品", "乐队"];
-
-function submitVote() {
-  const name = document.getElementById("name").value.trim();
-  if(!name){ alert("请输入姓名"); return; }
-
-  const selected = [...document.querySelectorAll("input[type=checkbox]:checked")].map(i=>i.value);
-  if(selected.length === 0){ alert("请选择节目"); return; }
-
-  db.ref("users/"+name).once("value", snap=>{
-    let voted = snap.val() || [];
-    if(voted.length + selected.length > 2){ alert("每人最多只能投2票"); return; }
-
-    selected.forEach(p=>{
-      if(!voted.includes(p)){
-        db.ref("votes/"+p).transaction(v => (v||0)+1);
-        voted.push(p);
-      }
-    });
-    db.ref("users/"+name).set(voted);
-    alert("🎉 投票成功！");
+function vote(name){
+  const voteRef = db.ref("votes/" + name);
+  voteRef.transaction(current => (current||0) + 1, (error, committed, snapshot) => {
+    if(error){
+      alert("投票失败：" + error);
+    } else if(committed){
+      alert(`已投票给 ${name}！当前票数：${snapshot.val()}`);
+    }
   });
 }
 </script>
-</head>
 
-<body>
-<h2>🎉 年会节目投票 🎉</h2>
-
-<div class="box">
-姓名：<br>
-<input id="name" style="width:100%; padding:10px; font-size:16px;">
-</div>
-
-<div class="box" id="programList"></div>
-
-<button onclick="submitVote()">提交投票</button>
-
-<script>
-const list = document.getElementById("programList");
-programs.forEach(p=>{
-  list.innerHTML += `<div style="margin:8px 0;">
-  <label><input type="checkbox" value="${p}"> ${p}</label>
-  </div>`;
-});
-</script>
 </body>
 </html>
