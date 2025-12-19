@@ -40,6 +40,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+// 实时监听 votes 节点
 db.ref("votes").on("value", snapshot => {
   const data = snapshot.val() || {};
   const list = Object.entries(data).map(([k,v]) => [k, Number(v)])

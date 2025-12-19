@@ -18,17 +18,13 @@ button:hover { background:gold; color:#000; }
 
 <h1>🎉 年会节目投票 🎉</h1>
 
-<div>
-  <button onclick="vote('节目A')">节目A</button>
-  <button onclick="vote('节目B')">节目B</button>
-  <button onclick="vote('节目C')">节目C</button>
-</div>
+<div id="buttons"></div>
 
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyA4LcWqtAhVbq0KDEmm2Hk0l-_me-dn-aY",
   authDomain: "vote-25c12.firebaseapp.com",
-  databaseURL: "https://vote-25c12-default-rtdb.firebaseio.com", // ✅ Realtime Database URL
+  databaseURL: "https://vote-25c12-default-rtdb.firebaseio.com",
   projectId: "vote-25c12",
   storageBucket: "vote-25c12.appspot.com",
   messagingSenderId: "344176299020",
@@ -39,6 +35,19 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+// 预设节目列表
+const shows = ["节目A", "节目B", "节目C"];
+
+// 动态生成按钮
+const container = document.getElementById("buttons");
+shows.forEach(show=>{
+  const btn = document.createElement("button");
+  btn.textContent = show;
+  btn.onclick = ()=>vote(show);
+  container.appendChild(btn);
+});
+
+// 投票函数
 function vote(name){
   const voteRef = db.ref("votes/" + name);
   voteRef.transaction(current => (current||0) + 1, (error, committed, snapshot) => {
